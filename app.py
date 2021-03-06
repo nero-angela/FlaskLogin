@@ -1,7 +1,7 @@
 import jwt
-import datetime
 import hashlib
 from functools import wraps
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 from flask import Flask, render_template, jsonify, request, redirect, url_for, g, make_response
 
@@ -105,7 +105,7 @@ def api_login():
         # jwt 토큰 발급
         payload = {
             'id': user['id'],  # user id
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=10)  # 만료 시간 (10초 뒤 만료)
+            'exp': datetime.utcnow() + timedelta(seconds=10)  # 만료 시간 (10초 뒤 만료)
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         print(f'token : {token}')
