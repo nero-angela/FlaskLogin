@@ -44,17 +44,17 @@
 <!-- script -->
 {% block script %}
 <script>
-    $(document).ready(function () {
-        // getUserNickname()
-        let nickname = "{{ user['nick'] }}"
-        alert(`${nickname}님 반갑습니다 👋`)
-    });
-
     function signOut() {
-        // 쿠키 삭제
-        $.removeCookie('token_give')
-        alert('Sign Out! 👋')
-        location.href = '/login'
+        $.ajax({
+            type: 'POST',
+            url: '/api/logout',
+            success: function(res) {
+                if (res['result'] === 'success') {
+                    alert(res['msg'])
+                    location.href = '/login'
+                }
+            }
+        })
     }
 
 </script>

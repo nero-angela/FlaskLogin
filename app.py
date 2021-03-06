@@ -3,7 +3,7 @@ import datetime
 import hashlib
 from functools import wraps
 from pymongo import MongoClient
-from flask import Flask, render_template, jsonify, request, redirect, url_for, g
+from flask import Flask, render_template, jsonify, request, redirect, url_for, g, make_response
 
 app = Flask(__name__)
 
@@ -13,13 +13,14 @@ db = client.dbsparta
 
 # jwt secret key
 SECRET_KEY = 'hello world'
+COOKIE_KEY = 'token_give'
 
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # 쿠키에서 token_give 가져오기
-        token_receive = request.cookies.get('token_give')
+        token_receive = request.cookies.get(COOKIE_KEY)
         print('token_receive :', token_receive)
 
         if token_receive is None:
@@ -108,10 +109,24 @@ def api_login():
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         print(f'token : {token}')
+        res = make_response(jsonify({'result': 'success', 'msg': f'{user["nick"]}님 안녕하세요 🙇🏻‍♂️'}))
 
-        return jsonify({'result': 'success', 'token': token})
+        # set cookie
+        res.set_cookie(COOKIE_KEY, token)
+
+        return res
     else:
         return jsonify({'result': 'fail', 'msg': '아이디와 비밀번호를 확인해주세요 😓'})
+
+
+# 로그아웃
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    res = make_response(jsonify({'result': 'success', 'msg': '로그아웃 👋'}))
+    
+    # cookie 삭제
+    res.delete_cookie(COOKIE_KEY)
+    return res
 
 
 if __name__ == '__main__':
